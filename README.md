@@ -1,2 +1,2 @@
-# sdoc
+# SDOC
 Small Database of Optical Constants
