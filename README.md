@@ -1,4 +1,4 @@
-# Small Database of Optical Constants
+Small Database of Optical Constants
 -------------------------------------
 
 Database of selected optical contants to be used in compositional modeling of solar system minor bodies.
