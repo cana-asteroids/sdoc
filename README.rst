@@ -10,7 +10,7 @@ access github.com/depra/cana
 
 HDF Schema
 ----------
-.. image:: https://raw.githubusercontent.com/depra/sdoc/master/docs/images/sdoc.png
+.. image:: https://raw.githubusercontent.com/depra/sdoc/master/docs/images/sdoc.png?token=ABGQYMSV3D54GENOC4OQR3K7AUUJA
    :align: center
    :scale: 50
 
