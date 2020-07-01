@@ -1,5 +1,5 @@
-Small Database of Optical Constants
--------------------------------------
+SDOC: Small Database of Optical Constants
+==========================================
 
 Database of selected optical contants to be used in compositional modeling of solar system minor bodies.
 All data of the optical constants are stored in a single HDF file, for easy sharing and access of the data.
