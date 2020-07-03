@@ -43,13 +43,8 @@ Dependencies
 How to install
 --------------
 
-If you have `Anaconda <https://www.anaconda.com/distribution/>`_ or `pip <https://pypi.org/project/pip/>`_ installed:
-
-::
-
-      pip install sdoc
-      
-Alternatively, download the last release or clone this repository using git,  unpack it if necessary, go into the directory "*sdoc-master*", and run on a terminal shell:
+If you have `Anaconda <https://www.anaconda.com/distribution/>`_ or `pip <https://pypi.org/project/pip/>`_ installed: 
+Download the last release or clone this repository using git,  unpack it if necessary, go into the directory "*sdoc-master*", and run on a terminal shell:
 
 ::
 
