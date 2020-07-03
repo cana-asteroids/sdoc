@@ -50,6 +50,10 @@ Download the last release or clone this repository using git,  unpack it if nece
 
    pip install .
    
+Usage
+-----
+For a example of how to access the database and search for a optical constant, take a look at `notebooks <https://github.com/depra/sdoc/blob/master/notebooks/accesing_the_database.ipynb>`_.
+   
 Cite
 ----
   
