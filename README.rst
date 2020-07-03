@@ -18,17 +18,16 @@ HDF Database Schema
 What is inside?
 ---------------
 
-==== =========== ============ ======== ======== ===== ========= ===== ================= ======================
-id   material ID material     subgroup group    state reference phase temperature       path                  
-==== =========== ============ ======== ======== ===== ========= ===== ================= ======================
-H_0  H           Poly-HCN     Misc     organics -     -         -     Khare et al. 1994 /organics/Misc/H/H_0  
-I_0  I           Ice Tholin   Misc     organics -     -         -     Khare et al. 1993 /organics/Misc/I/I_0  
-K_0  K           Kerogen      Misc     organics -     -         -     Khare et al. 1990 /organics/Misc/K/K_0  
-M_0  M           Murchison    Misc     organics -     -         -     Khare et al.      /organics/Misc/M/M_0  
-T_0  T           Titan Tholin Misc     organics -     -         -     Khare et al. 1984 /organics/Misc/T/T_0  
-at_0 at          Tholin alpha Misc     organics -     -         -     Khare et al. 1987 /organics/Misc/at/at_0
-==== =========== ============ ======== ======== ===== ========= ===== ================= ======================
-
+==== =========== ============ ======== ======== ================= ===== ===== =========== ======================
+id   material ID material     subgroup group    reference         state phase temperature path                  
+==== =========== ============ ======== ======== ================= ===== ===== =========== ======================
+H_0  H           Poly-HCN     Misc     organics Khare et al. 1994 -     -     -           /organics/Misc/H/H_0  
+I_0  I           Ice Tholin   Misc     organics Khare et al. 1993 -     -     -           /organics/Misc/I/I_0  
+K_0  K           Kerogen      Misc     organics Khare et al. 1990 -     -     -           /organics/Misc/K/K_0  
+M_0  M           Murchison    Misc     organics Khare et al.      -     -     -           /organics/Misc/M/M_0  
+T_0  T           Titan Tholin Misc     organics Khare et al. 1984 -     -     -           /organics/Misc/T/T_0  
+at_0 at          Tholin alpha Misc     organics Khare et al. 1987 -     -     -           /organics/Misc/at/at_0
+==== =========== ============ ======== ======== ================= ===== ===== =========== ======================
 
 Dependencies
 ------------
