@@ -1,36 +1,144 @@
-r"""
-"""
-import h5py
 import os
+import pandas as pd
+import numpy as np
+import h5py
 
 PWD = os.path.dirname(os.path.abspath(__file__))
 
 
-class SDOC(object):
+class SDOC(h5py.File):
     r"""
+    Extended HDF5 File object for the Small Database of Optical Constants.
+
+    Extended Attributes
+    -------------------
+    contents: pandas visualization of what is inside the database.
     """
-    def __init__(self, load=True, mode='r'):
-        r"""
-        """
-        if load:
-            self.mode = mode
-            self.db = self.__load__(mode)
 
-    @staticmethod
-    def __load__(mode):
-        r"""Load the HDF database."""
-        hf = h5py.File(PWD+'/data/sdoc.h5', mode)
-        return hf
-
-    def __getitem__(self, key):
+    def __init__(self, sdocfile=PWD+'/data/sdoc.h5', mode='a'):
         r"""
+        Create a new HDF file object with extended methods for SDOC.
+
+        For extended documentation on handling HDF files with h5py visit
+        https://www.h5py.org/
+
+        Parameters
+        ----------
+        sdocfile: str
+            The path for the SDOC hdf file.
+
+        mode: str
+            r        Readonly, file must exist (default)
+            r+       Read/write, file must exist
+            w        Create file, truncate if exists
+            w- or x  Create file, fail if exists
+            a        Read/write if exists, create otherwise
+
         """
-        return self.db[key]
+        h5py.File.__init__(self, sdocfile, mode=mode)
+        self.contents = pd.DataFrame(columns=['material ID', 'subgroup',
+                                              'group', 'material',
+                                              'state', 'reference', 'path'])
+        self.build_contents()
+
+    def build_contents(self, input=None):
+        r"""Build pandas.DataFrame of what is inside the SDOC file."""
+        if input is None:
+            input = self
+        for key, value in input.items():
+            if isinstance(value, h5py.Group):
+                self.build_contents(input=value)
+            elif isinstance(value, h5py.Dataset):
+                aux = value.name.split('/')[1:]
+                aux.reverse()
+                if len(aux) < 4:
+                    aux.append(None)
+                material = self[os.path.dirname(value.name)].attrs['material']
+                self.contents.loc[aux[0]] = [*aux[1:], material,
+                                             value.attrs['state'],
+                                             value.attrs['reference'],
+                                             value.name]
+        return self.contents
+
+    def update_contents(self):
+        r"""Update the contents DataFrame."""
+        self.contents = pd.DataFrame(columns=['material ID', 'subgroup',
+                                              'group', 'material',
+                                              'state', 'reference', 'path'])
+        self.build_contents()
+        return self.contents
+
+    def list_materials(self):
+        r"""List the materials and respective IDs."""
+        sdb = self.contents[['material ID', 'material']]
+        sdb = sdb.set_index('material ID')
+        sdb.drop_duplicates()
+        return sdb
+
+    def select_group(self, group, paths_only=False):
+        r"""
+        Select a compositional group.
+
+        Parameters
+        ----------
+        group: str
+            The name of the group or subgroup
+            (e.g. 'organics', 'silicates', 'hydrated'...)
+
+        return_paths: boolean
+            If True will return a list with the datasets of the group.
+            False will return a pandas.DataFrame with the group contents.
+
+        Returns
+        -------
+        list or pandas.DataFrame
+
+        """
+        if group in list(self.contents['group'].values):
+            sdb = self.contents[(self.contents['group'] == group)]
+        elif group in list(self.contents['subgroup'].values):
+            sdb = self.contents[(self.contents['subgroup'] == group)]
+        else:
+            raise(KeyError("group '{0}' not found.".format(group)))
+        if paths_only:
+            sdb = list(sdb['path'])
+        return sdb
+
+    def select_material(self, material, paths_only=False):
+        r"""
+        Select a compositional group.
+
+        Parameters
+        ----------
+        material: str
+            The name of the material
+            (e.g. 'Ice Tholin', 'Murchison'...)
+
+        return_paths: boolean
+            If True will return a list with the datasets of the materials.
+            False will return a pandas.DataFrame with the material contents.
+
+        Returns
+        -------
+        list or pandas.DataFrame
+        """
+        try:
+            sdb = self.contents[(self.contents['material'] == material)]
+        except KeyError as error:
+            raise(error('Material {0} not found.'.format(material)))
+        if paths_only:
+            sdb = list(sdb['path'])
+        return sdb
 
     def insert_constant(self, group, material, ocpath, mid=None, subgroup=None,
-                        reference=None, density=None):
+                        reference=None, density=None, state=None):
         r"""
-        Insert an optical constant to the HDF database.
+        Insert an optical constant to the SDOC database.
+
+        To save the changes you must close the database:
+        ..: sdb = SDOC()
+        ..: sdb.insert_constant(...)
+        ..: sdb.close()
 
         Parameters
         ----------
@@ -46,7 +154,8 @@ class SDOC(object):
             The ID for the compound (e.g. H, W, Ss). If none, it will search
             for the standard IDs from ___. However it will raise an error if
             mid is not assigned and the compound is not found in the list.
-            To see all the compound IDs use ....
+            To see all the compound IDs use .... If mid=None and is not found
+            in the list of IDs, it will set mid='U' (for undefined).
 
         ocpath: str
             The path for the optical constant file. The file must have three
@@ -63,25 +172,42 @@ class SDOC(object):
         density: float (optional)
             The density value for the compound
 
-        """
-        assert self.mode == 'w', "Assure HDF is initialized with mode='w"
+        state: string (optional)
+            The state of the material (amorphous, crystalline, glassy)
 
-    def listdb(self, group=None):
-        r"""
         """
-        def walker(name, obj):
-            if isinstance(obj, h5py._hl.dataset.Dataset) & \
-               (group in name):
-                print(name)
-                for key, val in obj.attrs.items():
-                    print("    %s: %s" % (key, val))
-        self.db.visititems(walker)
+        assert self.mode in ['w', 'a', 'r+'], "Assure SDOC is initialized with mode='w'"
 
-    @staticmethod
-    def walker(name, obj, group):
-        if (group in name) & isinstance(obj, h5py._hl.dataset.Dataset):
-            return name
+        if group not in self.keys():
+            self.create_group(group)
 
-    def save(self):
-        r"""
-        """
+        if subgroup not in self[group].keys():
+            self[group].create_group(subgroup)
+
+        if (mid is None):
+            aux = self.list_materials()
+            if (material in aux['materials']):
+                mid = aux[(aux['material'] == material)].index[0]
+            else:
+                mid = 'U'
+
+        if mid not in self[group][subgroup].keys():
+            self[group][subgroup].create_group(mid)
+            self[group][subgroup][mid].attrs['material'] = material
+
+        id = '{0}_{1}'.format(mid, len(self[group][subgroup][mid]))
+        try:
+            oc = np.loadtxt(ocpath, dtype=[('w', np.float64),
+                                           ('n', np.float64),
+                                           ('k', np.float64)])
+        except ValueError as error:
+            raise(error + r"""Check if the file have threecolumns: wavelength,
+                              real refractory index, imaginary refractory
+                              index.""")
+
+        self[group][subgroup][mid].create_dataset(id, data=oc)
+        self[group][subgroup][mid][id].attrs['reference'] = reference
+        self[group][subgroup][mid][id].attrs['density'] = density
+        self[group][subgroup][mid][id].attrs['state'] = state
+
+        self.update_contents()
