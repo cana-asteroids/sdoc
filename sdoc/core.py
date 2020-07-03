@@ -38,8 +38,8 @@ class SDOC(h5py.File):
         h5py.File.__init__(self, sdocfile, mode=mode)
         self.contents = pd.DataFrame(columns=['material ID', 'subgroup',
                                               'group', 'material',
-                                              'state', 'reference',
-                                              'phase', 'temperature',
+                                              'state', 'phase',
+                                              'temperature', 'reference',
                                               'path'])
         self.build_contents()
 
@@ -68,8 +68,8 @@ class SDOC(h5py.File):
         r"""Update the contents DataFrame."""
         self.contents = pd.DataFrame(columns=['material ID', 'subgroup',
                                               'group', 'material',
-                                              'state', 'reference',
-                                              'phase', 'temperature',
+                                              'state', 'phase',
+                                              'temperature', 'reference',
                                               'path'])
         self.build_contents()
         return self.contents
