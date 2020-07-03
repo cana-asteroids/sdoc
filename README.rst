@@ -20,6 +20,8 @@ Dependencies
 ------------
 
 - h5py
+- pandas
+- numpy
 
 
 How to install
