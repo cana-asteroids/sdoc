@@ -54,3 +54,8 @@ Os, alternatively, download the last release or clone this repository using git,
 ::
 
    pip install .
+   
+Cite
+----
+  
+A paper with the description of the database and the compositional modeling techniques are in preparation. However, if you use the optical constants inserted in the db, **make sure to cite the references from where the optical constants were extracted.**
