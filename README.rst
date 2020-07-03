@@ -7,7 +7,7 @@ All data of the optical constants are stored in a single HDF file, for easy shar
 
 This repository is focused only on the maintainment of database, to see compositional models access github.com/depra/cana
 
-**This database is currently under construction, the contents of the database are incomplete aan used for testing purposes only.
+**This database is currently under construction, the contents of the database are incomplete and used for testing purposes only.
 A version of database with carefully selected optical constants and their metadata will be available soon.**
 
 
