@@ -5,8 +5,11 @@ Database of selected optical contants to be used in compositional modeling of so
 
 All data of the optical constants are stored in a single HDF file, for easy sharing and access of the data.
 
-This repository is focused only on the maintainment of database, to see compositional models that use SDOC, 
-access github.com/depra/cana
+This repository is focused only on the maintainment of database, to see compositional models access github.com/depra/cana
+
+**This database is currently under construction, the contents of the database are incomplete and used for testing purposes only.
+A version of database with carefully selected optical constants and their metadata will be available soon.**
+
 
 HDF Database Schema
 --------------------
@@ -46,8 +49,13 @@ If you have `Anaconda <https://www.anaconda.com/distribution/>`_ or `pip <https:
 
       pip install sdoc
       
-Os, alternatively, download the last release or clone this repository using git,  Unpack it, if necessary, and go into the directory "*sdoc-master*", then run the below commands on a terminal shell:
+Alternatively, download the last release or clone this repository using git,  unpack it if necessary, go into the directory "*sdoc-master*", and run on a terminal shell:
 
 ::
 
    pip install .
+   
+Cite
+----
+  
+A paper with the description of the database and the compositional modeling techniques are in preparation. However, if you use the optical constants inserted in the db, **make sure to cite the references from where the optical constants were extracted.**
