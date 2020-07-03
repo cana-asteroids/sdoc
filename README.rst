@@ -49,7 +49,7 @@ If you have `Anaconda <https://www.anaconda.com/distribution/>`_ or `pip <https:
 
       pip install sdoc
       
-Os, alternatively, download the last release or clone this repository using git,  Unpack it, if necessary, and go into the directory "*sdoc-master*", then run the below commands on a terminal shell:
+Alternatively, download the last release or clone this repository using git,  unpack it if necessary, go into the directory "*sdoc-master*", and run on a terminal shell:
 
 ::
 
