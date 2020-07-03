@@ -38,7 +38,9 @@ class SDOC(h5py.File):
         h5py.File.__init__(self, sdocfile, mode=mode)
         self.contents = pd.DataFrame(columns=['material ID', 'subgroup',
                                               'group', 'material',
-                                              'state', 'reference', 'path'])
+                                              'state', 'reference',
+                                              'phase', 'temperature',
+                                              'path'])
         self.build_contents()
 
     def build_contents(self, input=None):
@@ -56,6 +58,8 @@ class SDOC(h5py.File):
                 material = self[os.path.dirname(value.name)].attrs['material']
                 self.contents.loc[aux[0]] = [*aux[1:], material,
                                              value.attrs['state'],
+                                             value.attrs['phase'],
+                                             value.attrs['temperature'],
                                              value.attrs['reference'],
                                              value.name]
         return self.contents
@@ -64,7 +68,9 @@ class SDOC(h5py.File):
         r"""Update the contents DataFrame."""
         self.contents = pd.DataFrame(columns=['material ID', 'subgroup',
                                               'group', 'material',
-                                              'state', 'reference', 'path'])
+                                              'state', 'reference',
+                                              'phase', 'temperature',
+                                              'path'])
         self.build_contents()
         return self.contents
 
@@ -130,8 +136,34 @@ class SDOC(h5py.File):
             sdb = list(sdb['path'])
         return sdb
 
+    def get_constant(self, constant):
+        r"""
+        Get the optical constant data.
+
+        Parameters
+        ----------
+        constant: str
+            The optical constant id or path (e.g. "H_0", "organics/Misc/H/H_0")
+
+        Returns
+        -------
+        label: str
+            the optical constant id
+        data: numpy structured array
+            the optical constant data (dtype=['w', 'n', 'k'])
+
+        """
+        if constant in self.contents.index:
+            label = constant
+            aux = self.contents.loc[constant]['path']
+        elif constant in self.contents['path']:
+            label = self.contents[(self.contents['path'] == constant)].index[0]
+            aux = constant
+        return label, self[aux][()]
+
     def insert_constant(self, group, material, ocpath, mid=None, subgroup=None,
-                        reference=None, density=None, state=None):
+                        reference=None, density=None, state=None, phase=None,
+                        temperature=None):
         r"""
         Insert an optical constant to the SDOC database.
 
@@ -173,8 +205,13 @@ class SDOC(h5py.File):
             The density value for the compound
 
         state: string (optional)
-            The state of the material (amorphous, crystalline, glassy)
+            The state of the material (pure, diluted, isolated)
 
+        phase: string (optional)
+            The phase of the material (amorphous, crystalline)
+
+        temperature: float (optional)
+            The temperature of the material
         """
         assert self.mode in ['w', 'a', 'r+'], "Assure SDOC is initialized with mode='w'"
 
@@ -209,5 +246,7 @@ class SDOC(h5py.File):
         self[group][subgroup][mid][id].attrs['reference'] = reference
         self[group][subgroup][mid][id].attrs['density'] = density
         self[group][subgroup][mid][id].attrs['state'] = state
+        self[group][subgroup][mid][id].attrs['temperature'] = temperature
+        self[group][subgroup][mid][id].attrs['phase'] = phase
 
         self.update_contents()
