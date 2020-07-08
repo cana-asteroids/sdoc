@@ -21,9 +21,9 @@ LICENSE = 'MIT License'
 # ##################
 PACKAGES = ['sdoc']
 
-#PACKAGE_DATA = {
-#   ' ': ['constants/*']
-#}
+PACKAGE_DATA = {
+   'sdoc': ['data/sdoc.h5']
+}
 
 # DEPENDENCIES
 # ##################
@@ -50,7 +50,7 @@ if __name__ == '__main__':
           #   scripts=SCRIPTS,
           packages=PACKAGES,
           #   ext_modules=EXT_MODULES,
-#          package_data=PACKAGE_DATA,
+          package_data=PACKAGE_DATA,
           #   classifiers=CLASSIFIERS,
           #   keywords=KEYWORDS,
           #   cmdclass=CMDCLASS,
