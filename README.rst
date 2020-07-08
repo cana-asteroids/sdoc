@@ -43,17 +43,16 @@ Dependencies
 How to install
 --------------
 
-If you have `Anaconda <https://www.anaconda.com/distribution/>`_ or `pip <https://pypi.org/project/pip/>`_ installed:
-
-::
-
-      pip install sdoc
-      
-Alternatively, download the last release or clone this repository using git,  unpack it if necessary, go into the directory "*sdoc-master*", and run on a terminal shell:
+If you have `Anaconda <https://www.anaconda.com/distribution/>`_ or `pip <https://pypi.org/project/pip/>`_ installed: 
+Download the last release or clone this repository using git,  unpack it if necessary, go into the directory "*sdoc-master*", and run on a terminal shell:
 
 ::
 
    pip install .
+   
+Usage
+-----
+For a example of how to access the database and search for a optical constant, take a look at `notebooks <https://github.com/depra/sdoc/blob/master/notebooks/accesing_the_database.ipynb>`_.
    
 Cite
 ----
