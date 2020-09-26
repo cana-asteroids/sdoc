@@ -14,7 +14,7 @@ A version of database with carefully selected optical constants and their metada
 HDF Database Schema
 --------------------
 
-.. image:: https://raw.githubusercontent.com/depra/sdoc/master/docs/images/sdoc.png?token=ABGQYMX3AAZIGIHN7JL7FL27GP7W2
+.. image:: https://raw.githubusercontent.com/depra/sdoc/master/docs/images/sdoc.png
    :align: center
    :scale: 50
 
