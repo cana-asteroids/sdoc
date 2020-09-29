@@ -15,7 +15,7 @@ class SDOC(h5py.File):
     contents: pandas visualization of what is inside the database.
     """
 
-    def __init__(self, sdocfile=PWD+'/data/sdoc.h5', mode='a'):
+    def __init__(self, sdocfile=PWD+'/data/sdoc.h5', mode='r'):
         r"""
         Create a new HDF file object with extended methods for SDOC.
 
@@ -160,6 +160,31 @@ class SDOC(h5py.File):
             label = self.contents[(self.contents['path'] == constant)].index[0]
             aux = constant
         return label, self[aux][()]
+
+    def get_constant_batch(self, constantlist):
+        r"""
+        Get the optical constant data.
+
+        Parameters
+        ----------
+        constant: str
+            The optical constant id or path (e.g. "H_0", "organics/Misc/H/H_0")
+
+        Returns
+        -------
+        label: str
+            the optical constant id
+        data: numpy structured array
+            the optical constant data (dtype=['w', 'n', 'k'])
+
+        """
+        data = []
+        labels = []
+        for c in constantlist:
+            l_aux, d_aux = self.get_constant(c)
+            data.append(d_aux)
+            labels.append(l_aux)
+        return labels, data
 
     def insert_constant(self, group, material, ocpath, mid=None, subgroup=None,
                         reference=None, density=None, state=None, phase=None,

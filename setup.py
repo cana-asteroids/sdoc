@@ -4,7 +4,7 @@ from setuptools import setup
 
 # PACKAGE METADATA
 # ##################
-NAME = 'sdoc'
+NAME = 'cana-sdoc'
 FULLNAME = "SDOC"
 VERSION = '0.1'
 DESCRIPTION = 'Small Database of Optical Constants'
@@ -14,7 +14,7 @@ AUTHOR = '''M. De Pra'''
 AUTHOR_EMAIL = 'mariondepra@gmail.com'
 MAINTAINER = 'M. De Pra'
 MAINTAINER_EMAIL = AUTHOR_EMAIL
-URL = 'https://github.com/depra/samba'
+URL = 'https://github.com/depra/sdoc'
 LICENSE = 'MIT License'
 
 # TO BE INSTALLED
