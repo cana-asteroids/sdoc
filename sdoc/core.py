@@ -36,11 +36,11 @@ class SDOC(h5py.File):
 
         """
         h5py.File.__init__(self, sdocfile, mode=mode)
-        self.contents = pd.DataFrame(columns=['material ID', 'subgroup',
-                                              'group', 'material',
-                                              'state', 'phase',
-                                              'temperature', 'reference',
-                                              'path'])
+        self._keys = ['id', 'mid', 'material', 'formula', 'group',
+                      'phase', 'temp', 
+                      'wmin', 'wmax', 'res', 
+                      'hpath', 'ref']
+        self.contents = pd.DataFrame(columns=self._keys)
         self.build_contents()
 
     def build_contents(self, input=None):
@@ -55,29 +55,34 @@ class SDOC(h5py.File):
                 aux.reverse()
                 if len(aux) < 4:
                     aux.append(None)
-                material = self[os.path.dirname(value.name)].attrs['material']
-                self.contents.loc[aux[0]] = [*aux[1:], material,
-                                             value.attrs['state'],
+                material = self[f"{aux[2]}/{aux[1]}"].attrs['material']
+                formula = self[f"{aux[2]}/{aux[1]}"].attrs['formula']
+                self.contents.loc[aux[0]] = [key, aux[1], material, formula, aux[2],
                                              value.attrs['phase'],
-                                             value.attrs['temperature'],
-                                             value.attrs['reference'],
-                                             value.name]
+                                             value.attrs['temp'],
+                                             value.attrs['wmin'],
+                                             value.attrs['wmax'],
+                                             value.attrs['res'],
+                                             value.name,
+                                             value.attrs['ref']
+                                             ]
+
+
         return self.contents
 
     def update_contents(self):
         r"""Update the contents DataFrame."""
-        self.contents = pd.DataFrame(columns=['material ID', 'subgroup',
-                                              'group', 'material',
-                                              'state', 'phase',
-                                              'temperature', 'reference',
-                                              'path'])
+        self.contents = pd.DataFrame(columns=['id', 'mid', 'material', 'formula', 'group',
+                                               'phase', 'temp', 
+                                               'wmin', 'wmax', 'res', 
+                                               'hpath', 'ref'])
         self.build_contents()
         return self.contents
 
     def list_materials(self):
         r"""List the materials and respective IDs."""
-        sdb = self.contents[['material ID', 'material']]
-        sdb = sdb.set_index('material ID')
+        sdb = self.contents[['mid', 'material']]
+        sdb = sdb.set_index('mid')
         sdb.drop_duplicates()
         return sdb
 
@@ -91,7 +96,7 @@ class SDOC(h5py.File):
             The name of the group or subgroup
             (e.g. 'organics', 'silicates', 'hydrated'...)
 
-        return_paths: boolean
+        paths_only: boolean
             If True will return a list with the datasets of the group.
             False will return a pandas.DataFrame with the group contents.
 
@@ -102,12 +107,10 @@ class SDOC(h5py.File):
         """
         if group in list(self.contents['group'].values):
             sdb = self.contents[(self.contents['group'] == group)]
-        elif group in list(self.contents['subgroup'].values):
-            sdb = self.contents[(self.contents['subgroup'] == group)]
         else:
             raise(KeyError("group '{0}' not found.".format(group)))
         if paths_only:
-            sdb = list(sdb['path'])
+            sdb = list(sdb['hpath'])
         return sdb
 
     def select_material(self, material, paths_only=False):
@@ -133,7 +136,7 @@ class SDOC(h5py.File):
         except KeyError as error:
             raise(error('Material {0} not found.'.format(material)))
         if paths_only:
-            sdb = list(sdb['path'])
+            sdb = list(sdb['hpath'])
         return sdb
 
     def get_constant(self, constant):
@@ -155,9 +158,9 @@ class SDOC(h5py.File):
         """
         if constant in self.contents.index:
             label = constant
-            aux = self.contents.loc[constant]['path']
-        elif constant in self.contents['path']:
-            label = self.contents[(self.contents['path'] == constant)].index[0]
+            aux = self.contents.loc[constant]['hpath']
+        elif constant in self.contents['hpath']:
+            label = self.contents[(self.contents['hpath'] == constant)].index[0]
             aux = constant
         return label, self[aux][()]
 
@@ -186,14 +189,14 @@ class SDOC(h5py.File):
             labels.append(l_aux)
         return labels, data
 
-    def insert_constant(self, group, material, ocpath, mid=None, subgroup=None,
-                        reference=None, density=None, state=None, phase=None,
-                        temperature=None):
+    def insert_constant(self, group, material, mid, ocpath, id=None,
+                        ref=None, phase=None, temp=None, formula=None,
+                        wmin=None, wmax=None, res=None):
         r"""
         Insert an optical constant to the SDOC database.
 
         To save the changes you must close the database:
-        ..: sdb = SDOC()
+        ..: sdb = SDOC(mode="r+")
         ..: sdb.insert_constant(...)
         ..: sdb.close()
 
@@ -219,7 +222,7 @@ class SDOC(h5py.File):
             columns: wavelength, real refractory index, imaginary refractory
             index.
 
-        subgroup: str (optional)
+        subgroup: str
             The ID of the subgroup, if any (e.g. for Silicates are Piroxenes,
             Hydrated...)
 
@@ -243,21 +246,14 @@ class SDOC(h5py.File):
         if group not in self.keys():
             self.create_group(group)
 
-        if subgroup not in self[group].keys():
-            self[group].create_group(subgroup)
 
-        if (mid is None):
-            aux = self.list_materials()
-            if (material in aux['materials']):
-                mid = aux[(aux['material'] == material)].index[0]
-            else:
-                mid = 'U'
+        if mid not in self[group].keys():
+            self[group].create_group(mid)
+            self[group][mid].attrs['material'] = material
+            self[group][mid].attrs['formula'] = formula
 
-        if mid not in self[group][subgroup].keys():
-            self[group][subgroup].create_group(mid)
-            self[group][subgroup][mid].attrs['material'] = material
-
-        id = '{0}_{1}'.format(mid, len(self[group][subgroup][mid]))
+        if id is None:
+            id = '{0}_{1}'.format(mid, len(self[group][mid]))
         try:
             oc = np.loadtxt(ocpath, dtype=[('w', np.float64),
                                            ('n', np.float64),
@@ -266,12 +262,44 @@ class SDOC(h5py.File):
             raise(error + r"""Check if the file have threecolumns: wavelength,
                               real refractory index, imaginary refractory
                               index.""")
+        if ref is None:
+            ref = '-'
+        if temp is None:
+            temp = np.nan
+        if phase is None:
+            phase = '-'
+        self[group][mid].create_dataset(id, data=oc)
+        self[group][mid][id].attrs['ref'] = ref
+        self[group][mid][id].attrs['temp'] = temp
+        self[group][mid][id].attrs['phase'] = phase
+        self[group][mid][id].attrs['wmin'] = wmin
+        self[group][mid][id].attrs['wmax'] = wmax
+        self[group][mid][id].attrs['res'] = res
+        # self[group][mid][id].attrs['material'] = material
+        # self[group][mid][id].attrs['formula'] = formula
 
-        self[group][subgroup][mid].create_dataset(id, data=oc)
-        self[group][subgroup][mid][id].attrs['reference'] = reference
-        self[group][subgroup][mid][id].attrs['density'] = density
-        self[group][subgroup][mid][id].attrs['state'] = state
-        self[group][subgroup][mid][id].attrs['temperature'] = temperature
-        self[group][subgroup][mid][id].attrs['phase'] = phase
 
         self.update_contents()
+
+
+
+    def insert_constants_csv(self, catalog=PWD+'/data/sdoc.csv', oc_dir=PWD+'/data/oc_files'):
+        r"""
+        """
+        cat = pd.read_csv(catalog)
+        for i, ii in cat.iterrows():
+            self.insert_constant(group=ii['group'], 
+                                 material=ii['material'],
+                                 mid=ii['mid'], 
+                                 ocpath=oc_dir+ii['hpath']+'.txt', 
+                                 id=ii['id'],
+                                 ref=ii['ref'], 
+                                 phase=ii['phase'], 
+                                 temp=ii['temp'], 
+                                 formula=ii['formula'], 
+
+                                 wmin=ii['wmin'], 
+                                 wmax=ii['wmax'], 
+                                 res=ii['res'])
+        self.update_contents()
+

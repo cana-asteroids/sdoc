@@ -6,7 +6,7 @@ from setuptools import setup
 # ##################
 NAME = 'cana-sdoc'
 FULLNAME = "SDOC"
-VERSION = '0.1'
+VERSION = '0.11'
 DESCRIPTION = 'Small Database of Optical Constants'
 with open("README.rst") as f:
     LONG_DESCRIPTION = ''.join(f.readlines())
@@ -22,7 +22,7 @@ LICENSE = 'MIT License'
 PACKAGES = ['sdoc']
 
 PACKAGE_DATA = {
-   'sdoc': ['data/sdoc.h5']
+   'sdoc': ['data/*', 'data/oc_files/*']
 }
 
 # DEPENDENCIES
