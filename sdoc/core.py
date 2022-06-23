@@ -139,6 +139,32 @@ class SDOC(h5py.File):
             sdb = list(sdb['hpath'])
         return sdb
 
+    def select_constants(self, ids, paths_only=False):
+        r"""
+        Select a compositional group.
+
+        Parameters
+        ----------
+        material: str
+            The name of the material
+            (e.g. 'Ice Tholin', 'Murchison'...)
+
+        return_paths: boolean
+            If True will return a list with the datasets of the materials.
+            False will return a pandas.DataFrame with the material contents.
+
+        Returns
+        -------
+        list or pandas.DataFrame
+        """
+        try:
+            sdb = self.contents.loc[ids]
+        except KeyError as error:
+            raise(error('Optical Constants {0} not found.'.format(ids)))
+        if paths_only:
+            sdb = list(sdb['hpath'])
+        return sdb
+
     def get_constant(self, constant):
         r"""
         Get the optical constant data.
