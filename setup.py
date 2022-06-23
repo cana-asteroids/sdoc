@@ -6,7 +6,7 @@ from setuptools import setup
 # ##################
 NAME = 'cana-sdoc'
 FULLNAME = "SDOC"
-VERSION = '0.11'
+VERSION = '0.12'
 DESCRIPTION = 'Small Database of Optical Constants'
 with open("README.rst") as f:
     LONG_DESCRIPTION = ''.join(f.readlines())
