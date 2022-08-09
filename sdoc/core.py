@@ -309,7 +309,7 @@ class SDOC(h5py.File):
 
 
 
-    def insert_constants_csv(self, catalog=PWD+'/data/sdoc.csv', oc_dir=PWD+'/data/oc_files'):
+    def insert_constants_csv(self, catalog=PWD+'/data/sdoc.csv', oc_dir=PWD+'/data/oc_files/'):
         r"""
         """
         cat = pd.read_csv(catalog)
@@ -323,9 +323,12 @@ class SDOC(h5py.File):
                                  phase=ii['phase'], 
                                  temp=ii['temp'], 
                                  formula=ii['formula'], 
-
                                  wmin=ii['wmin'], 
                                  wmax=ii['wmax'], 
                                  res=ii['res'])
         self.update_contents()
 
+
+    def clean(self):
+        self.clear()
+        self.update_contents()
