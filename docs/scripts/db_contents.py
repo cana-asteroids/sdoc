@@ -7,15 +7,34 @@ def gen_rst_table():
     r"""Generate table of database contents in .rst format."""
     sdb = sdoc.SDOC(mode ='r')
     sdb.contents['id'] = sdb.contents.index
-    sdb.contents = sdb.contents[['id', 'material ID', 'material', 'subgroup',
-                                 'group',  'reference', 'state', 'phase',
-                                 'temperature', 'path']]
-    data = list(sdb.contents.values)
-    data.insert(0, ['id', 'material ID', 'material', 'subgroup',
-                    'group', 'reference', 'state', 'phase',
-                    'temperature', 'path'])
+
+    sdb.contents['wmin'] = sdb.contents['wmin'].astype("string")
+    sdb.contents['wmax'] = sdb.contents['wmax'].astype("string")
+    sdb.contents['res'] = sdb.contents['res'].astype("string")
+
+    sdb.contents = sdb.contents[['id', 'mid', 'material', 'formula', 'group',
+                      'phase', 'temp', 
+                      'wmin', 'wmax', 'res', 
+                      'hpath', 'ref']]
+
+    data = sdb.contents.values.tolist()
+    data.insert(0, ['id', 'mid', 'material', 'formula', 'group',
+                      'phase', 'temp', 
+                      'wmin', 'wmax', 'res', 
+                      'hpath', 'ref'])
+    # print(data[0])
     numcolumns = len(data[0])
-    colsizes = [max(len(r[i]) for r in data) for i in range(numcolumns)]
+    # print(len(data[0]))
+    colsizes = []
+    for i in range(numcolumns):
+        # print(i)
+        # print([r[i] for r in data])
+    #     for r in data:
+    #         print(r)
+        colsizes.append(max([len(r[i]) for r in data]))
+        # print(max([len(r[i]) for r in data]))
+    # colsizes = [len(r[i]) for r in data for i in range(numcolumns)]
+    # print(numcolumns, [len(r[numcolumns-1]) for r in data])
     formatter = ' '.join('{:<%d}' % c for c in colsizes)
     rowsformatted = [formatter.format(*row) for row in data]
     line = formatter.format(*['=' * c for c in colsizes])

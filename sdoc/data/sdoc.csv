@@ -23,8 +23,8 @@
 23,m03_0,m03,Mixture 3,NH3(1)-N2(1.7),mixtures,-,15K,0.3,4.99002,470,/mixtures/m03_0,Zanchet et al. 2013
 24,m04_0,m04,Mixture 4,H2O(20)-CH4(1),mixtures,-,40K,0.3,4.99002,470,/mixtures/m04_0,Hudgins et al 1993
 25,m05_0,m05,Mixture 5,CH4-N2,mixtures,beta,38K,0.3,4.99002,470,/mixtures/m05_0,"Quirico and schmitt 1992, SShade"
-26,trt_0,tri,Triton Tholin,,organics,-,-,0.3,4.99002,470,/organics/trt_0,Khare
-27,tit_0,tit,Titan Tholin,,organics,-,-,0.3,4.99002,470,/organics/tit_0,Khare et al 1984
+26,trt_0,tri,Triton Tholin,-,organics,-,-,0.3,4.99002,470,/organics/trt_0,Khare
+27,tit_0,tit,Titan Tholin,-,organics,-,-,0.3,4.99002,470,/organics/tit_0,Khare et al 1984
 29,pyr_1,pyr,Pyroxene,"Mg_x,Fe_1-x,SiO3,x=0.50",silicates,-,-,0.3,4.99002,470,/silicates/pyr_1,Dorschner et al. 1995
 30,pyr_2,pyr,Pyroxene,"Mg_x,Fe_1-x,SiO3,x=0.60",silicates,-,-,0.3,4.99002,470,/silicates/pyr_2,Dorschner et al. 1995
 31,pyr_3,pyr,Pyroxene,"Mg_x,Fe_1-x,SiO3,x=0.70",silicates,-,-,0.3,4.99002,470,/silicates/pyr_3,Dorschner et al. 1995
