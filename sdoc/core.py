@@ -1,4 +1,4 @@
-import os
+import os, shutil
 import pandas as pd
 import numpy as np
 import h5py
@@ -36,7 +36,7 @@ class SDOC(h5py.File):
 
         """
         h5py.File.__init__(self, sdocfile, mode=mode)
-        self._keys = ['id', 'mid', 'material', 'formula', 'group',
+        self._keys = ['oid', 'mid', 'material', 'formula', 'group',
                       'phase', 'temp', 
                       'wmin', 'wmax', 'res', 
                       'hpath', 'ref']
@@ -72,7 +72,7 @@ class SDOC(h5py.File):
 
     def update_contents(self):
         r"""Update the contents DataFrame."""
-        self.contents = pd.DataFrame(columns=['id', 'mid', 'material', 'formula', 'group',
+        self.contents = pd.DataFrame(columns=['oid', 'mid', 'material', 'formula', 'group',
                                                'phase', 'temp', 
                                                'wmin', 'wmax', 'res', 
                                                'hpath', 'ref'])
@@ -215,9 +215,8 @@ class SDOC(h5py.File):
             labels.append(l_aux)
         return labels, data
 
-    def insert_constant(self, group, material, mid, ocpath, id=None,
-                        ref=None, phase=None, temp=None, formula=None,
-                        wmin=None, wmax=None, res=None):
+    def insert_constant(self, group, material, mid, ocpath, oid=None,
+                        ref=None, phase=None, temp=None, formula=None):
         r"""
         Insert an optical constant to the SDOC database.
 
@@ -236,7 +235,7 @@ class SDOC(h5py.File):
             The full name of the compound material (e.g. Titan Tholin,
             Serpentine).
 
-        mid: str (optional)
+        mid: str 
             The ID for the compound (e.g. H, W, Ss). If none, it will search
             for the standard IDs from ___. However it will raise an error if
             mid is not assigned and the compound is not found in the list.
@@ -248,38 +247,40 @@ class SDOC(h5py.File):
             columns: wavelength, real refractory index, imaginary refractory
             index.
 
-        subgroup: str
-            The ID of the subgroup, if any (e.g. for Silicates are Piroxenes,
-            Hydrated...)
+        oid: str (optional)
+            The database identifier for the optical constant. If no value
+            is given, it will create as "mid_n", where mid is the material
+            identifier provided, and n is number of optical constants in
+            the database +1.  
 
-        reference: str (optional)
+        ref: str (optional)
             The name of the reference for the optical constant
-
-        density: float (optional)
-            The density value for the compound
-
-        state: string (optional)
-            The state of the material (pure, diluted, isolated)
 
         phase: string (optional)
             The phase of the material (amorphous, crystalline)
 
         temperature: float (optional)
             The temperature of the material
+        
+        formula: str (optional)
+            The chemical formula of the optical constants
         """
         assert self.mode in ['w', 'a', 'r+'], "Assure SDOC is initialized with mode='w'"
 
         if group not in self.keys():
             self.create_group(group)
 
-
+        if formula is None:
+            formula  = ''
+        if material is None:
+            material = ''
         if mid not in self[group].keys():
             self[group].create_group(mid)
             self[group][mid].attrs['material'] = material
             self[group][mid].attrs['formula'] = formula
 
-        if id is None:
-            id = '{0}_{1}'.format(mid, len(self[group][mid]))
+        if oid is None:
+            oid = '{0}_{1}'.format(mid, len(self[group][mid]))
         try:
             oc = np.loadtxt(ocpath, dtype=[('w', np.float64),
                                            ('n', np.float64),
@@ -288,47 +289,87 @@ class SDOC(h5py.File):
             raise(error + r"""Check if the file have threecolumns: wavelength,
                               real refractory index, imaginary refractory
                               index.""")
+        wmin = oc['w'].min()
+        wmax = oc['w'].max()
+        res = len(oc['w'])
         if ref is None:
             ref = '-'
         if temp is None:
             temp = np.nan
         if phase is None:
             phase = '-'
-        self[group][mid].create_dataset(id, data=oc)
-        self[group][mid][id].attrs['ref'] = ref
-        self[group][mid][id].attrs['temp'] = temp
-        self[group][mid][id].attrs['phase'] = phase
-        self[group][mid][id].attrs['wmin'] = wmin
-        self[group][mid][id].attrs['wmax'] = wmax
-        self[group][mid][id].attrs['res'] = res
-        # self[group][mid][id].attrs['material'] = material
-        # self[group][mid][id].attrs['formula'] = formula
-
+        self[group][mid].create_dataset(oid, data=oc)
+        self[group][mid][oid].attrs['ref'] = ref
+        self[group][mid][oid].attrs['temp'] = temp
+        self[group][mid][oid].attrs['phase'] = phase
+        self[group][mid][oid].attrs['wmin'] = wmin
+        self[group][mid][oid].attrs['wmax'] = wmax
+        self[group][mid][oid].attrs['res'] = res
+        # self[group][mid][oid].attrs['material'] = material
+        # self[group][mid][oid].attrs['formula'] = formula
 
         self.update_contents()
 
 
 
-    def insert_constants_csv(self, catalog=PWD+'/data/sdoc.csv', oc_dir=PWD+'/data/oc_files/'):
+    def insert_constants_csv(self, catalog=PWD+'/data/sdoc.csv', basedir=PWD+'/data/oc_files/'):
         r"""
         """
         cat = pd.read_csv(catalog)
         for i, ii in cat.iterrows():
+            if 'oid' not in cat.columns:
+                oid = None
+            else:
+                oid = ii['oid']
+            hpath = ii['hpath']
+            if basedir is not None:
+                hpath = basedir + hpath
+            if 'ref' not in cat.columns:
+                ref = None
+            else:
+                ref = ii['ref']
+            if 'phase' not in cat.columns:
+                phase = None
+            else:
+                phase = ii['phase']
+            if 'temp' not in cat.columns:
+                temp = None
+            else:
+                temp = ii['temp']
+            if 'formula' not in cat.columns:
+                formula = None
+            else:
+                formula = ii['formula']
+
             self.insert_constant(group=ii['group'], 
                                  material=ii['material'],
                                  mid=ii['mid'], 
-                                 ocpath=oc_dir+ii['hpath']+'.txt', 
-                                 id=ii['id'],
-                                 ref=ii['ref'], 
-                                 phase=ii['phase'], 
-                                 temp=ii['temp'], 
-                                 formula=ii['formula'], 
-                                 wmin=ii['wmin'], 
-                                 wmax=ii['wmax'], 
-                                 res=ii['res'])
+                                 ocpath=hpath, 
+                                 oid=oid,
+                                 ref=ref, 
+                                 phase=phase, 
+                                 temp=temp, 
+                                 formula=formula)
         self.update_contents()
 
 
     def clean(self):
         self.clear()
         self.update_contents()
+
+    def export(self, path):
+        r"""
+        """
+        shutil.copyfile(self.filename, path)
+    
+    def overwrite(self, path):
+        r"""
+        """
+        os.remove(self.filename)
+        shutil.copyfile(path, self.filename)
+        self.update_contents()
+
+    def merge(self, path):
+        r"""
+        Needs implementations
+        """

@@ -28,7 +28,7 @@ PACKAGE_DATA = {
 # DEPENDENCIES
 # ##################
 INSTALL_REQUIRES = [
-    'numpy',
+    'numpy>=1.21',
     'pandas',
     'h5py',
 ]
