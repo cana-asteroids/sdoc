@@ -259,7 +259,7 @@ class SDOC(h5py.File):
         phase: string (optional)
             The phase of the material (amorphous, crystalline)
 
-        temperature: float (optional)
+        temp: float (optional)
             The temperature of the material
         
         formula: str (optional)
